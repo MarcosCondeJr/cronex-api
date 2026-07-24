@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.chronex.cronex_api.dto.exception.ErrorResponseDTO;
 import com.chronex.cronex_api.dto.exception.FieldError;
 
-import jakarta.validation.ValidationException;
-
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
