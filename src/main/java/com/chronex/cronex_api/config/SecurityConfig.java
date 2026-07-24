@@ -26,6 +26,7 @@ public class SecurityConfig {
                     .dispatcherTypeMatchers(DispatcherType.ERROR).permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll()
+                    // .requestMatchers(HttpMethod.GET, "/**").permitAll() habilitar somente para testes
                     .anyRequest()
                     .authenticated()
                 )
