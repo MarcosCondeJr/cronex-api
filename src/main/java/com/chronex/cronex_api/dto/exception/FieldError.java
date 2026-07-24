@@ -7,10 +7,12 @@ import lombok.Setter;
 @Setter
 public class FieldError {
     private String name;
+    private String rejectedValue;
     private String message;
 
-    public FieldError(String name, String message) {
+    public FieldError(String name, String rejectedValue, String message) {
         this.name = name;
+        this.rejectedValue = rejectedValue;
         this.message = message;
     }
 }
