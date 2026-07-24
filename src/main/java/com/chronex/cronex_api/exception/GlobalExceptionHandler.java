@@ -2,8 +2,8 @@ package com.chronex.cronex_api.exception;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 
+import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -121,11 +121,13 @@ public class GlobalExceptionHandler {
     }
 
     /**
-     * Simulação de obtenção do traceId!
+     * Retorna o traceId do contexto atual
      * 
      * @return String Id
      */
     private String getOrCreateTraceId() {
-        return UUID.randomUUID().toString();
+        return (MDC.get("traceId") != null) 
+                ? MDC.get("traceId")
+                : "N/A";
     }
 }
