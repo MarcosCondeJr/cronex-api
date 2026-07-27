@@ -31,9 +31,9 @@ public class UserService {
      * @return
      */
     public UserResponse register(UserRequest request) {
-        Optional<User> existingUser = userRepository.findByEmail(request.email());
+        User existingUser = (User) userRepository.findByEmail(request.email());
 
-        if (!existingUser.isEmpty()) {
+        if (existingUser != null) {
             throw new ConflictException("Email já cadastrado");
         }
 
