@@ -1,5 +1,6 @@
 package com.chronex.cronex_api.service;
 
+import java.time.Instant;
 import java.util.Optional;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,8 +19,9 @@ public class UserService {
     private UserRepository userRepository;
     private PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     /**
@@ -40,6 +42,8 @@ public class UserService {
         user.setEmail(request.email());
         user.setPassword(passwordEncoder.encode(request.password()));
         user.setRole(UserRole.USER);
+        user.setCreatedAt(Instant.now());
+        user.setActive(true);
 
         userRepository.save(user);
 

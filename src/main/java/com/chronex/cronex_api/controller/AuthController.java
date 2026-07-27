@@ -8,45 +8,60 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.chronex.cronex_api.config.TokenConfig;
 import com.chronex.cronex_api.dto.auth.AuthRequest;
 import com.chronex.cronex_api.dto.auth.AuthResponse;
 import com.chronex.cronex_api.dto.user.UserRequest;
 import com.chronex.cronex_api.dto.user.UserResponse;
+import com.chronex.cronex_api.entity.User;
 import com.chronex.cronex_api.service.AuthService;
 import com.chronex.cronex_api.service.UserService;
 
 import jakarta.validation.Valid;
 
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 
 @RestController
 @RequestMapping("api/auth")
 public class AuthController {
 
-    private AuthService authService;
     private UserService userService;
     private AuthenticationManager authenticationManager;
+    private TokenConfig tokenConfig;
 
-    public AuthController(AuthService authService, AuthenticationManager authenticationManager)
+    public AuthController(
+        AuthService authService, 
+        UserService userService, 
+        AuthenticationManager authenticationManager, 
+        TokenConfig tokenConfig
+    )
     {
-        this.authService = authService;
+        this.userService = userService;
         this.authenticationManager = authenticationManager;
+        this.tokenConfig = tokenConfig;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@Valid AuthRequest request)
+    public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest request)
     {
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(request.email(), request.password());
         Authentication authentication = authenticationManager.authenticate(authToken);
 
-        this.authService.login(request);
+        User user = (authentication.getPrincipal() != null) ? (User) authentication.getPrincipal() : null;
 
-        return ResponseEntity.ok(null);
+        String token = this.tokenConfig.generatedToken(user);
+
+        AuthResponse response = new AuthResponse(
+            token, UserResponse.fromEntity(user)
+        );
+
+        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserResponse> register(@Valid UserRequest request)
+    public ResponseEntity<UserResponse> register(@Valid @RequestBody UserRequest request)
     {
         UserResponse response = this.userService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
