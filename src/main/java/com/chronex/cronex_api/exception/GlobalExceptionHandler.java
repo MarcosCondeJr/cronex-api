@@ -44,6 +44,11 @@ public class GlobalExceptionHandler {
         return buildError(HttpStatus.NOT_FOUND, "NOT_FOUND", "Endpoint nao encontrado.", ex.getHttpMethod() + ex.getRequestURL());
     }
 
+    @ExceptionHandler(TokenException.class)
+    public ResponseEntity<ErrorResponseDTO> handleNotFoundException(TokenException ex, HttpServletRequest request) {
+        return buildError(HttpStatus.FORBIDDEN, "INVALID_TOKEN", ex.getMessage(), request.getMethod() + request.getRequestURL());
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException .class)
     public ResponseEntity<ErrorResponseDTO> handleValidationException(MethodArgumentNotValidException ex, HttpServletRequest request) {
         
