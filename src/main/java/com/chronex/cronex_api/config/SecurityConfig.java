@@ -15,7 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.chronex.cronex_api.infra.security.ApiAuthenticationEntryPoint;
+import com.chronex.cronex_api.infra.security.CustomAuthenticationEntryPoint;
 
 @Configuration
 @EnableWebSecurity
@@ -23,9 +23,13 @@ public class SecurityConfig {
 
     private SecurityFilter securityFilter;
 
+    public SecurityConfig(SecurityFilter securityFilter) {
+        this.securityFilter = securityFilter;
+    }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        ApiAuthenticationEntryPoint entryPoint = new ApiAuthenticationEntryPoint();
+        CustomAuthenticationEntryPoint entryPoint = new CustomAuthenticationEntryPoint();
 
         return http 
                 .csrf(csrf -> csrf.disable())
@@ -43,7 +47,7 @@ public class SecurityConfig {
                     .anyRequest()
                     .authenticated()
                 )
-                .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(this.securityFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

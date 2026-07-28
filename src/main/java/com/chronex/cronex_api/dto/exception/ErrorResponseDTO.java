@@ -1,13 +1,13 @@
 package com.chronex.cronex_api.dto.exception;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Include.NON_EMPTY) 
 public record ErrorResponseDTO (
-    Instant timestamp,
+    String timestamp,
     int status,
     String code,
     String message,
@@ -17,12 +17,12 @@ public record ErrorResponseDTO (
 ) {
     public ErrorResponseDTO {
         if (timestamp == null) {
-            timestamp = Instant.now();
+            timestamp = LocalDateTime.now().toString();
         }
     }
 
     public ErrorResponseDTO(
-        Instant timestamp,
+        String timestamp,
         int status, 
         String code, 
         String message, 

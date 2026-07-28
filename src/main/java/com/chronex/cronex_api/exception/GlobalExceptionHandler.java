@@ -1,6 +1,6 @@
 package com.chronex.cronex_api.exception;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.slf4j.MDC;
@@ -83,7 +83,7 @@ public class GlobalExceptionHandler {
     ) 
     {
         ErrorResponseDTO errorDTO = new ErrorResponseDTO(
-            Instant.now(),
+            LocalDateTime.now().toString(),
             status.value(),
             code,
             message,
@@ -113,7 +113,7 @@ public class GlobalExceptionHandler {
     ) 
     {
         ErrorResponseDTO errorDTO = new ErrorResponseDTO(
-            Instant.now(),
+            LocalDateTime.now().toString(),
             status.value(),
             code,
             message,
