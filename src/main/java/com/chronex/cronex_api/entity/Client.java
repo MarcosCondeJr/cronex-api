@@ -24,6 +24,8 @@ public class Client {
 
     private String name;
 
+    private UUID userId;
+
     @Column(name = "cpf_cnpj")
     private String cpfCnpj;
 
