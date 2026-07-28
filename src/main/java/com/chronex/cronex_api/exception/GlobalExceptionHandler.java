@@ -21,22 +21,22 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ErrorResponseDTO> handleUnauthorizedException(UnauthorizedException ex, HttpServletRequest request) {
-        return buildError(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", ex.getMessage(), request.getMethod() + request.getRequestURL());
+        return buildError(HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", ex.getMessage(), request.getMethod() + request.getRequestURI());
     }
 
     @ExceptionHandler(ForbiddenException.class)
     public ResponseEntity<ErrorResponseDTO> handleForbiddenException(ForbiddenException ex,  HttpServletRequest request) {
-        return buildError(HttpStatus.FORBIDDEN, "FORBIDDEN", ex.getMessage(), request.getMethod() + request.getRequestURL());
+        return buildError(HttpStatus.FORBIDDEN, "FORBIDDEN", ex.getMessage(), request.getMethod() + request.getRequestURI());
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ErrorResponseDTO> handleEntityNotFoundException(EntityNotFoundException ex, HttpServletRequest request) {
-        return buildError(HttpStatus.NOT_FOUND, "ENTITY_NOT_FOUND", ex.getMessage(), request.getMethod() + request.getRequestURL());
+        return buildError(HttpStatus.NOT_FOUND, "ENTITY_NOT_FOUND", ex.getMessage(), request.getMethod() + request.getRequestURI());
     }
 
     @ExceptionHandler(ConflictException.class)
     public ResponseEntity<ErrorResponseDTO> handleConflictException(ConflictException ex, HttpServletRequest request) {
-        return buildError(HttpStatus.CONFLICT, "CONFLICT", ex.getMessage(), request.getMethod() + request.getRequestURL());
+        return buildError(HttpStatus.CONFLICT, "CONFLICT", ex.getMessage(), request.getMethod() + request.getRequestURI());
     }
 
     @ExceptionHandler(NoHandlerFoundException.class)
@@ -46,7 +46,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(TokenException.class)
     public ResponseEntity<ErrorResponseDTO> handleNotFoundException(TokenException ex, HttpServletRequest request) {
-        return buildError(HttpStatus.FORBIDDEN, "INVALID_TOKEN", ex.getMessage(), request.getMethod() + request.getRequestURL());
+        return buildError(HttpStatus.FORBIDDEN, "INVALID_TOKEN", ex.getMessage(), request.getMethod() + request.getRequestURI());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException .class)
@@ -60,7 +60,7 @@ public class GlobalExceptionHandler {
                                             error.getDefaultMessage()))
                                     .toList();
 
-        return buildError(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", ex.getMessage(), request.getMethod() + request.getRequestURL(), errors);
+        return buildError(HttpStatus.BAD_REQUEST, "VALIDATION_ERROR", ex.getMessage(), request.getMethod() + request.getRequestURI(), errors);
     }
 
     /**

@@ -4,9 +4,11 @@ import java.util.UUID;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
 
 import com.chronex.cronex_api.entity.User;
 
+@Service
 public class CurrentUserService {
 
     /**
