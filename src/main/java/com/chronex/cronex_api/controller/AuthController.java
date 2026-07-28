@@ -8,12 +8,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.chronex.cronex_api.config.TokenConfig;
 import com.chronex.cronex_api.dto.auth.AuthRequest;
 import com.chronex.cronex_api.dto.auth.AuthResponse;
 import com.chronex.cronex_api.dto.user.UserRequest;
 import com.chronex.cronex_api.dto.user.UserResponse;
 import com.chronex.cronex_api.entity.User;
+import com.chronex.cronex_api.infra.security.TokenConfig;
 import com.chronex.cronex_api.service.AuthService;
 import com.chronex.cronex_api.service.UserService;
 

@@ -1,4 +1,4 @@
-package com.chronex.cronex_api.config;
+package com.chronex.cronex_api.infra.security;
 
 import java.time.Instant;
 import java.time.LocalDateTime;

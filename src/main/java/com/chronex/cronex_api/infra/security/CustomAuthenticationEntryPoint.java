@@ -35,7 +35,7 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
             LocalDateTime.now().toString(),
             HttpStatus.UNAUTHORIZED.value(),
             "UNAUTHORIZED",
-            ex.getMessage(),
+            ex.getLocalizedMessage(),
             request.getMethod() + request.getRequestURI(),
             getOrCreateTraceId()
         );
