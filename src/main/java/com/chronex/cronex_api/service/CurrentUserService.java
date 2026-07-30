@@ -7,6 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.chronex.cronex_api.entity.User;
+import com.chronex.cronex_api.exception.UnauthorizedException;
 
 @Service
 public class CurrentUserService {
@@ -22,7 +23,7 @@ public class CurrentUserService {
             return (User) auth.getPrincipal();
         }
         
-        return null;
+        throw new UnauthorizedException("Usuário não autenticado");
     }
 
     /**
@@ -31,9 +32,6 @@ public class CurrentUserService {
      */
     public UUID getCurrentUserId() {
         User currentUser = getCurrentUser();
-        if (currentUser != null) {
-            return currentUser.getId();
-        }
-        return null;
+        return currentUser.getId();
     }
 }
