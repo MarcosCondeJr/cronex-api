@@ -54,8 +54,7 @@ public class TokenConfig {
                     .getSubject();
         } catch (TokenExpiredException ex) {
             throw new TokenException("Token expirado.");
-        }
-            catch (JWTVerificationException ex) {
+        } catch (JWTVerificationException ex) {
             throw new TokenException("Token inválido.");
         }
     }
