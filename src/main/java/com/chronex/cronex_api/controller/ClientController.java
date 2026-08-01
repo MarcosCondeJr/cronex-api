@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.chronex.cronex_api.dto.client.ClientFilter;
 import com.chronex.cronex_api.dto.client.ClientRequest;
 import com.chronex.cronex_api.dto.client.ClientResponse;
+import com.chronex.cronex_api.dto.client.ClientUpdate;
 import com.chronex.cronex_api.service.ClientService;
 
 import jakarta.validation.Valid;
@@ -17,6 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -47,13 +49,15 @@ public class ClientController {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @PutMapping("{id}")
-    public void updateClient(@PathVariable String id, @RequestBody String entity) {
-
+    @PatchMapping("{id}")
+    public ResponseEntity<ClientResponse> updateClient(@PathVariable String id, @Valid @RequestBody ClientUpdate clientUpdate) {
+        ClientResponse response = clientService.updateClient(id, clientUpdate);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 
     @DeleteMapping("{id}")
-    public void deleteClient(@PathVariable String id) {
+    public ResponseEntity<Void> deleteClient(@PathVariable String id) {
         clientService.deleteClient(id);
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

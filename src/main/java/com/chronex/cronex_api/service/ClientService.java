@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.chronex.cronex_api.dto.client.ClientFilter;
 import com.chronex.cronex_api.dto.client.ClientRequest;
 import com.chronex.cronex_api.dto.client.ClientResponse;
+import com.chronex.cronex_api.dto.client.ClientUpdate;
 import com.chronex.cronex_api.entity.Client;
 import com.chronex.cronex_api.exception.ConflictException;
 import com.chronex.cronex_api.repository.ClientRepository;
@@ -74,13 +75,56 @@ public class ClientService {
     }
 
     /**
+     * Atualiza um cliente existente
+     * 
+     * @param id Id do cliente a ser atualizado
+     * @param clientUpdate Dados para atualização do cliente
+     * @return
+     */
+    public ClientResponse updateClient(String id, ClientUpdate clientUpdate) {
+        Client client = clientRepository.findById(UUID.fromString(id))
+                .orElseThrow(() -> new ConflictException("Cliente não encontrado."));
+
+        if (clientUpdate.name() != null) {
+            client.setName(clientUpdate.name());
+        }
+
+        if (clientUpdate.cpfCnpj() != null) {
+            if (clientRepository.existsByCpfCnpjAndUserIdAndIdNot(clientUpdate.cpfCnpj(), currentUserService.getCurrentUserId(), UUID.fromString(id))) {
+                throw new ConflictException("Já existe um cliente com o mesmo CPF/CNPJ.");
+            }
+            client.setCpfCnpj(clientUpdate.cpfCnpj());
+        }
+        
+        if (clientUpdate.company() != null) {
+            client.setCompany(clientUpdate.company());
+        }
+
+        if (clientUpdate.email() != null) {
+            client.setEmail(clientUpdate.email());
+        }
+
+        if (clientUpdate.phone() != null) {
+            client.setPhone(clientUpdate.phone());
+        }
+
+        if (clientUpdate.notes() != null) {
+            client.setNotes(clientUpdate.notes());
+        }
+
+        clientRepository.save(client);
+
+        return ClientResponse.fromEntity(client);
+    }
+
+    /**
      * Exclui um cliente de um determinado usuário
      * 
      * @param string id Id do cliente a ser excluído
      * @return void
      */
     public void deleteClient(String id) {
-        Client client = clientRepository.findById(UUID.fromString(id))
+        Client client = clientRepository.findByIdAndUserId(UUID.fromString(id), currentUserService.getCurrentUserId())
                 .orElseThrow(() -> new ConflictException("Cliente não encontrado."));
 
         clientRepository.delete(client);

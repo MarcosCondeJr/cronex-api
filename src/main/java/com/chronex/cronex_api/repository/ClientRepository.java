@@ -1,5 +1,6 @@
 package com.chronex.cronex_api.repository;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -11,6 +12,10 @@ import com.chronex.cronex_api.entity.Client;
 
 public interface ClientRepository extends JpaRepository<Client, UUID>, JpaSpecificationExecutor<Client>{
     boolean existsByCpfCnpjAndUserId(String cpfCnpj, UUID userId);
+
+    boolean existsByCpfCnpjAndUserIdAndIdNot(String cpfCnpj, UUID userId, UUID notId);
+
+    Optional<Client> findByIdAndUserId(UUID id, UUID userId);
 
     Page<Client> findAll(Pageable pageable);
 }
