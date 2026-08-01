@@ -112,6 +112,8 @@ public class ClientService {
             client.setNotes(clientUpdate.notes());
         }
 
+        client.setUpdatedAt(Instant.now());
+
         clientRepository.save(client);
 
         return ClientResponse.fromEntity(client);
