@@ -72,4 +72,17 @@ public class ClientService {
 
         return ClientResponse.fromEntity(client);
     }
+
+    /**
+     * Exclui um cliente de um determinado usuário
+     * 
+     * @param string id Id do cliente a ser excluído
+     * @return void
+     */
+    public void deleteClient(String id) {
+        Client client = clientRepository.findById(UUID.fromString(id))
+                .orElseThrow(() -> new ConflictException("Cliente não encontrado."));
+
+        clientRepository.delete(client);
+    }
 }
