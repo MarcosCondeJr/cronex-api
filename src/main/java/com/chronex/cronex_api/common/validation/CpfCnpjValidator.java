@@ -8,7 +8,7 @@ public class CpfCnpjValidator implements ConstraintValidator<CpfCnpj, String> {
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
         if (value == null || value.isEmpty()) {
-            return false;
+            return true; // Utilizo o @NotNull ou @NotEmpty para validar se o campo é obrigatório, caso seja necessário
         }
 
         return validateDocument(value);
