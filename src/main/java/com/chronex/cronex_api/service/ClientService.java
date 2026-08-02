@@ -28,16 +28,12 @@ public class ClientService {
 
     private OrganizationRepository  organizationRepository;
 
-    private CurrentUserService currentUserService;
-
     public ClientService(
         ClientRepository clientRepository, 
-        OrganizationRepository organizationRepository, 
-        CurrentUserService currentUserService
+        OrganizationRepository organizationRepository
     ) {
         this.clientRepository = clientRepository;
         this.organizationRepository = organizationRepository;
-        this.currentUserService = currentUserService;
     }
 
     /**
@@ -70,13 +66,14 @@ public class ClientService {
         Organization organization = organizationRepository.findById(organizationId)
                 .orElseThrow(() -> new EntityNotFoundException("Organização não encontrada"));
 
-        if (clientRepository.existsByCpfCnpjAndUserIdAndOrganizationId(clientRequest.cpfCnpj(), currentUserService.getCurrentUserId(), organizationId)) {
-            throw new ConflictException("Já existe um cliente com o mesmo CPF/CNPJ.");
+        if (clientRepository
+            .existsByCpfCnpjAndUserIdAndOrganizationId(clientRequest.cpfCnpj(), CurrentUserService.getCurrentUserId(), organizationId)) {
+                throw new ConflictException("Já existe um cliente com o mesmo CPF/CNPJ.");
         }
 
         Client client = new Client();
         client.setName(clientRequest.name());
-        client.setUser(currentUserService.getCurrentUser());
+        client.setUser(CurrentUserService.getCurrentUser());
         client.setOrganization(organization);
         client.setCpfCnpj(clientRequest.cpfCnpj());
         client.setCompany(clientRequest.company());
@@ -106,7 +103,7 @@ public class ClientService {
         }
 
         if (clientUpdate.cpfCnpj() != null) {
-            if (clientRepository.existsByCpfCnpjAndUserIdAndIdNot(clientUpdate.cpfCnpj(), currentUserService.getCurrentUserId(), UUID.fromString(id))) {
+            if (clientRepository.existsByCpfCnpjAndUserIdAndIdNot(clientUpdate.cpfCnpj(), CurrentUserService.getCurrentUserId(), UUID.fromString(id))) {
                 throw new ConflictException("Já existe um cliente com o mesmo CPF/CNPJ.");
             }
             client.setCpfCnpj(clientUpdate.cpfCnpj());
@@ -142,7 +139,7 @@ public class ClientService {
      * @return void
      */
     public void deleteClient(String id) {
-        Client client = clientRepository.findByIdAndUserId(UUID.fromString(id), currentUserService.getCurrentUserId())
+        Client client = clientRepository.findByIdAndUserId(UUID.fromString(id), CurrentUserService.getCurrentUserId())
                 .orElseThrow(() -> new ConflictException("Cliente não encontrado."));
 
         clientRepository.delete(client);

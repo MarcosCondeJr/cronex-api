@@ -16,7 +16,7 @@ public class CurrentUserService {
      * Retorna o usuário atualmente autenticado.
      * @return
      */
-    public User getCurrentUser() {
+    public static User getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
         if (auth != null && auth.getPrincipal() instanceof User) {
@@ -30,7 +30,7 @@ public class CurrentUserService {
      * Retorna o ID do usuário atualmente autenticado.
      * @return
      */
-    public UUID getCurrentUserId() {
+    public static UUID getCurrentUserId() {
         User currentUser = getCurrentUser();
         return currentUser.getId();
     }
