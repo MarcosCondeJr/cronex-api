@@ -16,7 +16,6 @@ import com.chronex.cronex_api.entity.Client;
 import com.chronex.cronex_api.entity.Organization;
 import com.chronex.cronex_api.exception.ConflictException;
 import com.chronex.cronex_api.exception.EntityNotFoundException;
-import com.chronex.cronex_api.exception.NullOrganizationException;
 import com.chronex.cronex_api.infra.tenant.TenantContext;
 import com.chronex.cronex_api.repository.ClientRepository;
 import com.chronex.cronex_api.repository.OrganizationRepository;
@@ -50,9 +49,9 @@ public class ClientService {
      * @return
      */
     public Page<ClientResponse> getClients(ClientFilter filter, Pageable pageable) {
-        UUID userId = this.currentUserService.getCurrentUserId();
+        UUID organizationId = TenantContext.getCurrentOrganizationId();
 
-        Specification<Client> spec = ClientSpecification.withFilters(userId, filter);
+        Specification<Client> spec = ClientSpecification.withFilters(organizationId, filter);
 
         Page<Client> clients = clientRepository.findAll(spec, pageable);
 
@@ -66,11 +65,7 @@ public class ClientService {
      * @return
      */
     public ClientResponse createClient(ClientRequest clientRequest) {
-
-        UUID organizationId = TenantContext.getOrganizationId();
-        if (organizationId == null) {
-            throw new NullOrganizationException("Header X-Organization-Id é obrigatório para essa operação");
-        }
+        UUID organizationId = TenantContext.getCurrentOrganizationId();
 
         Organization organization = organizationRepository.findById(organizationId)
                 .orElseThrow(() -> new EntityNotFoundException("Organização não encontrada"));

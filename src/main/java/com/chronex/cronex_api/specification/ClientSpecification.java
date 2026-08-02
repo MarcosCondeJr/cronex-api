@@ -12,11 +12,11 @@ import com.chronex.cronex_api.entity.Client;
 import jakarta.persistence.criteria.Predicate;
 
 public class ClientSpecification {
-    public static Specification<Client> withFilters(UUID userId, ClientFilter filter) {
+    public static Specification<Client> withFilters(UUID organizationId, ClientFilter filter) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            predicates.add(cb.equal(root.get("user").get("id"), userId));
+            predicates.add(cb.equal(root.get("organization").get("id"), organizationId));
 
             if (filter.name() != null && !filter.name().isBlank()) {
                 predicates.add(
