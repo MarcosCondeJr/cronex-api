@@ -15,14 +15,19 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.chronex.cronex_api.infra.tenant.TenantFilter;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
     private SecurityFilter securityFilter;
 
-    public SecurityConfig(SecurityFilter securityFilter) {
+    private TenantFilter tenantFilter;
+
+    public SecurityConfig(SecurityFilter securityFilter, TenantFilter tenantFilterq) {
         this.securityFilter = securityFilter;
+        this.tenantFilter = tenantFilterq;
     }
 
     @Bean
@@ -46,6 +51,7 @@ public class SecurityConfig {
                     .authenticated()
                 )
                 .addFilterBefore(this.securityFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(this.tenantFilter, SecurityFilter.class)
                 .build();
     }
 
