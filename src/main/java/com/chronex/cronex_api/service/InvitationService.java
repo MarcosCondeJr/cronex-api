@@ -66,4 +66,8 @@ public class InvitationService {
 
         return InvitationResponse.fromEntity(invitation);
     }
+
+    public void acceptInvitation(String invitationToken) {
+        
+    }
 }
