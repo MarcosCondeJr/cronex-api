@@ -13,8 +13,13 @@ import com.chronex.cronex_api.dto.client.ClientRequest;
 import com.chronex.cronex_api.dto.client.ClientResponse;
 import com.chronex.cronex_api.dto.client.ClientUpdate;
 import com.chronex.cronex_api.entity.Client;
+import com.chronex.cronex_api.entity.Organization;
 import com.chronex.cronex_api.exception.ConflictException;
+import com.chronex.cronex_api.exception.EntityNotFoundException;
+import com.chronex.cronex_api.exception.NullOrganizationException;
+import com.chronex.cronex_api.infra.tenant.TenantContext;
 import com.chronex.cronex_api.repository.ClientRepository;
+import com.chronex.cronex_api.repository.OrganizationRepository;
 import com.chronex.cronex_api.specification.ClientSpecification;
 
 @Service
@@ -22,10 +27,17 @@ public class ClientService {
 
     private ClientRepository clientRepository;
 
+    private OrganizationRepository  organizationRepository;
+
     private CurrentUserService currentUserService;
 
-    public ClientService(ClientRepository clientRepository, CurrentUserService currentUserService) {
+    public ClientService(
+        ClientRepository clientRepository, 
+        OrganizationRepository organizationRepository, 
+        CurrentUserService currentUserService
+    ) {
         this.clientRepository = clientRepository;
+        this.organizationRepository = organizationRepository;
         this.currentUserService = currentUserService;
     }
 
@@ -55,13 +67,22 @@ public class ClientService {
      */
     public ClientResponse createClient(ClientRequest clientRequest) {
 
-        if (clientRepository.existsByCpfCnpjAndUserId(clientRequest.cpfCnpj(), currentUserService.getCurrentUserId())) {
+        UUID organizationId = TenantContext.getOrganizationId();
+        if (organizationId == null) {
+            throw new NullOrganizationException("Header X-Organization-Id é obrigatório para essa operação");
+        }
+
+        Organization organization = organizationRepository.findById(organizationId)
+                .orElseThrow(() -> new EntityNotFoundException("Organização não encontrada"));
+
+        if (clientRepository.existsByCpfCnpjAndUserIdAndOrganizationId(clientRequest.cpfCnpj(), currentUserService.getCurrentUserId(), organizationId)) {
             throw new ConflictException("Já existe um cliente com o mesmo CPF/CNPJ.");
         }
 
         Client client = new Client();
         client.setName(clientRequest.name());
         client.setUser(currentUserService.getCurrentUser());
+        client.setOrganization(organization);
         client.setCpfCnpj(clientRequest.cpfCnpj());
         client.setCompany(clientRequest.company());
         client.setEmail(clientRequest.email());

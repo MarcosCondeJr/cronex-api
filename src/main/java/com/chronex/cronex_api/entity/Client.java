@@ -31,6 +31,10 @@ public class Client {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "organization_id", nullable = false)
+    private Organization organization;
+
     @Column(name = "cpf_cnpj")
     private String cpfCnpj;
 

@@ -11,7 +11,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import com.chronex.cronex_api.entity.Client;
 
 public interface ClientRepository extends JpaRepository<Client, UUID>, JpaSpecificationExecutor<Client>{
-    boolean existsByCpfCnpjAndUserId(String cpfCnpj, UUID userId);
+    boolean existsByCpfCnpjAndUserIdAndOrganizationId(String cpfCnpj, UUID userId, UUID organizationId);
 
     boolean existsByCpfCnpjAndUserIdAndIdNot(String cpfCnpj, UUID userId, UUID notId);
 
