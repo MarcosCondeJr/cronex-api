@@ -17,5 +17,7 @@ public interface ClientRepository extends JpaRepository<Client, UUID>, JpaSpecif
 
     Optional<Client> findByIdAndUserId(UUID id, UUID userId);
 
+    Optional<Client> findByIdAndOrganizationId(UUID id, UUID organizationId);
+
     Page<Client> findAll(Pageable pageable);
 }
