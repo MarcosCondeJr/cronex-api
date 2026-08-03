@@ -45,13 +45,18 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(TokenException.class)
-    public ResponseEntity<ErrorResponseDTO> handleNotFoundException(TokenException ex, HttpServletRequest request) {
+    public ResponseEntity<ErrorResponseDTO> handleInvalidTokenException(TokenException ex, HttpServletRequest request) {
         return buildError(HttpStatus.FORBIDDEN, "INVALID_TOKEN", ex.getMessage(), request.getMethod() + request.getRequestURI());
     }
 
     @ExceptionHandler(NullOrganizationException.class)
     public ResponseEntity<ErrorResponseDTO> handleNullOrganizationException(NullOrganizationException ex, HttpServletRequest request) {
         return buildError(HttpStatus.BAD_REQUEST, "NULL_ORGANIZATION", ex.getMessage(), request.getMethod() + request.getRequestURI());
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ErrorResponseDTO> handleBadRequestException(BadRequestException ex, HttpServletRequest request) {
+        return buildError(HttpStatus.BAD_REQUEST, "BAD_REQUEST", ex.getMessage(), request.getMethod() + request.getRequestURI());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
