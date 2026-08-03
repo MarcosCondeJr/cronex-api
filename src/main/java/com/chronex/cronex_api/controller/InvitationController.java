@@ -1,12 +1,16 @@
 package com.chronex.cronex_api.controller;
 
+import java.util.UUID;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.chronex.cronex_api.dto.invitation.InvitationAccepted;
 import com.chronex.cronex_api.dto.invitation.InvitationRequest;
 import com.chronex.cronex_api.dto.invitation.InvitationResponse;
 import com.chronex.cronex_api.service.InvitationService;
@@ -26,5 +30,11 @@ public class InvitationController {
     public ResponseEntity<InvitationResponse> createInvitation(@Valid @RequestBody InvitationRequest request) {
         InvitationResponse response = this.invitationService.createInvitation(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PostMapping("{token}/accept")
+    public ResponseEntity<InvitationAccepted> acceptInvitation(@PathVariable String token) {
+        InvitationAccepted response = this.invitationService.acceptInvitation(UUID.fromString(token));
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }
