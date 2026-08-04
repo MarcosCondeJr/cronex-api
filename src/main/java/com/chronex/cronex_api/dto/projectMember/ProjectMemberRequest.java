@@ -1,7 +1,6 @@
 package com.chronex.cronex_api.dto.projectMember;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 import com.chronex.cronex_api.enums.OrganizationRole;
 
@@ -12,7 +11,7 @@ import jakarta.validation.constraints.NotNull;
 
 public record ProjectMemberRequest(
     @NotNull(message = "O usuário é obrigatório")
-    UUID userId, 
+    String userId, 
 
     @NotBlank(message = "A função do membro é obrigatória")
     OrganizationRole role, 

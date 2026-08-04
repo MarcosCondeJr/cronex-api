@@ -1,9 +1,13 @@
 package com.chronex.cronex_api.dto.projectMember;
 
+import java.math.BigDecimal;
+
+import com.chronex.cronex_api.enums.OrganizationRole;
+
 public record ProjectMemberUpdate(
     String userId,
-    String role,
-    String hourlyRate
+    OrganizationRole role,
+    BigDecimal hourlyRate
 ) {
     
 }

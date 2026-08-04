@@ -1,6 +1,5 @@
 package com.chronex.cronex_api.service;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -13,7 +12,6 @@ import com.chronex.cronex_api.dto.projectMember.ProjectMemberUpdate;
 import com.chronex.cronex_api.entity.Project;
 import com.chronex.cronex_api.entity.ProjectMember;
 import com.chronex.cronex_api.entity.User;
-import com.chronex.cronex_api.enums.OrganizationRole;
 import com.chronex.cronex_api.exception.ConflictException;
 import com.chronex.cronex_api.repository.ProjectMemberRepository;
 import com.chronex.cronex_api.repository.ProjectRepository;
@@ -31,7 +29,14 @@ public class ProjectMemberService {
         this.userRepository = userRepository;
     }
 
-    public ProjectMemberResponse addMember(UUID projectId, ProjectMemberUpdate data) {
+    public List<ProjectMemberResponse> findAllByProject(UUID projectId) {
+        return projectMemberRepository.findAllByProjectId(projectId)
+                .stream()
+                .map(ProjectMemberResponse::fromEntity)
+                .toList();
+    }
+
+    public ProjectMemberResponse addMember(UUID projectId, ProjectMemberRequest data) {
         if (projectMemberRepository.existsByProjectIdAndUserId(projectId, UUID.fromString(data.userId()))) {
             throw new ConflictException("O Usuário já está alocado nesse projeto");
         }
@@ -45,8 +50,8 @@ public class ProjectMemberService {
         ProjectMember projectMember = new ProjectMember();
         projectMember.setProject(project);
         projectMember.setUser(user);
-        projectMember.setRole(OrganizationRole.valueOf(data.role()));
-        projectMember.setHourlyRate(new BigDecimal(data.hourlyRate()));
+        projectMember.setRole(data.role());
+        projectMember.setHourlyRate(data.hourlyRate());
         projectMember.setJoinedAt(Instant.now());
         projectMember.setCreatedAt(Instant.now());
 
@@ -54,18 +59,27 @@ public class ProjectMemberService {
         return ProjectMemberResponse.fromEntity(projectMember);
     }
 
-    public ProjectMemberResponse updateMember(UUID projectId, UUID userId) {
-        ProjectMember projectMember = projectMemberRepository.findByProjectIdAndUserId(projectId, userId)
-                .orElseThrow(() -> new ConflictException("Membro do projeto não encontrado"));
+    public ProjectMemberResponse updateMember(UUID projectMemberId, ProjectMemberUpdate data) {
+        UUID userId = UUID.fromString(data.userId());
+        
+        ProjectMember projectMember = projectMemberRepository.findById(projectMemberId)
+                .orElseThrow(() -> new ConflictException("Membro do projeto não encontrado para edição"));
+
+        if (data.userId() != null && userId != projectMember.getUser().getId()) {
+            if (projectMemberRepository.existsByProjectIdAndUserIdAndProjectMemberIdNot(projectMember.getProject().getId(), userId, projectMember.getId())) {
+                throw new ConflictException("Este membro já está integrado no projeto");
+            }
+        }
+
+        if (data.role() != null) {
+            projectMember.setRole(data.role());
+        }
+
+        if (data.hourlyRate() != null) {
+            projectMember.setHourlyRate(data.hourlyRate());
+        }
 
         return ProjectMemberResponse.fromEntity(projectMember);
-    }
-
-    public List<ProjectMemberResponse> findAllByProject(UUID projectId) {
-        return projectMemberRepository.findAllByProjectId(projectId)
-                .stream()
-                .map(ProjectMemberResponse::fromEntity)
-                .toList();
     }
 
     public void removeMember(UUID projectId, UUID userId) {
