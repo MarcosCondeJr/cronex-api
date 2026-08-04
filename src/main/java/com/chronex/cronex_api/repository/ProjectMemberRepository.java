@@ -1,5 +1,6 @@
 package com.chronex.cronex_api.repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -11,4 +12,6 @@ public interface ProjectMemberRepository extends JpaRepository<ProjectMember, UU
     Optional<ProjectMember> findByProjectIdAndUserId(UUID projectId, UUID userId);
     
     boolean existsByProjectIdAndUserId(UUID projectId, UUID userId);
+
+    List<ProjectMember> findAllByProjectId(UUID projectId);
 }

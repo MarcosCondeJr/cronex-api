@@ -89,13 +89,13 @@ public class ProjectService {
         ProjectMember projectMember = new ProjectMember();
         projectMember.setProject(project);
         projectMember.setUser(user);
-        projectMember.setRole(OrganizationRole.ADMIN);
+        projectMember.setRole(OrganizationRole.OWNER);
         projectMember.setHourlyRate(data.hourlyRate());
         projectMember.setJoinedAt(Instant.now());
         projectMember.setCreatedAt(Instant.now());
 
         this.projectMemberRepository.save(projectMember);
-        
+
         return ProjectResponse.fromEntity(project);
     }
 
