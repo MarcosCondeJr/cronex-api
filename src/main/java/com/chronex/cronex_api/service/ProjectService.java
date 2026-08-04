@@ -10,11 +10,15 @@ import com.chronex.cronex_api.dto.project.ProjectResponse;
 import com.chronex.cronex_api.dto.project.ProjectUpdate;
 import com.chronex.cronex_api.entity.Client;
 import com.chronex.cronex_api.entity.Project;
+import com.chronex.cronex_api.entity.ProjectMember;
+import com.chronex.cronex_api.entity.User;
+import com.chronex.cronex_api.enums.OrganizationRole;
 import com.chronex.cronex_api.enums.ProjectStatus;
 import com.chronex.cronex_api.exception.BadRequestException;
 import com.chronex.cronex_api.exception.ConflictException;
 import com.chronex.cronex_api.infra.tenant.TenantContext;
 import com.chronex.cronex_api.repository.ClientRepository;
+import com.chronex.cronex_api.repository.ProjectMemberRepository;
 import com.chronex.cronex_api.repository.ProjectRepository;
 
 import jakarta.transaction.Transactional;
@@ -23,13 +27,16 @@ import jakarta.transaction.Transactional;
 public class ProjectService {
     private ProjectRepository projectRepository;
     private ClientRepository clientRepository;
+    private ProjectMemberRepository projectMemberRepository;
 
     public ProjectService(
         ProjectRepository projectRepository, 
-        ClientRepository clientRepository
+        ClientRepository clientRepository,
+        ProjectMemberRepository projectMemberRepository
     ) {
         this.projectRepository = projectRepository;
         this.clientRepository = clientRepository;
+        this.projectMemberRepository = projectMemberRepository;
     }
 
     /**
@@ -57,7 +64,7 @@ public class ProjectService {
     @Transactional
     public ProjectResponse createProject(ProjectRequest data) { 
         UUID organizationId = TenantContext.getCurrentOrganizationId();
-        UUID userId = CurrentUserService.getCurrentUserId();
+        User user = CurrentUserService.getCurrentUser();
 
         Client client = this.clientRepository.findByIdAndOrganizationId(data.clientId(), organizationId)
                             .orElseThrow(() -> new BadRequestException("Cliente não encontrado"));
@@ -74,10 +81,20 @@ public class ProjectService {
         project.setEstimatedHours(data.estimatedHours());
         project.setOrganizationId(organizationId);
         project.setStatus(ProjectStatus.PLANNING);
-        project.setOwnerId(userId);
+        project.setOwnerId(user.getId());
         project.setCreatedAt(Instant.now());
 
         this.projectRepository.save(project);
+
+        ProjectMember projectMember = new ProjectMember();
+        projectMember.setProject(project);
+        projectMember.setUser(user);
+        projectMember.setRole(OrganizationRole.ADMIN);
+        projectMember.setHourlyRate(data.hourlyRate());
+        projectMember.setJoinedAt(Instant.now());
+        projectMember.setCreatedAt(Instant.now());
+
+        this.projectMemberRepository.save(projectMember);
         
         return ProjectResponse.fromEntity(project);
     }
