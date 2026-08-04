@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import com.chronex.cronex_api.dto.project.ProjectRequest;
 import com.chronex.cronex_api.dto.project.ProjectResponse;
+import com.chronex.cronex_api.dto.project.ProjectUpdate;
 import com.chronex.cronex_api.entity.Client;
 import com.chronex.cronex_api.entity.Project;
 import com.chronex.cronex_api.enums.ProjectStatus;
@@ -29,6 +30,21 @@ public class ProjectService {
     ) {
         this.projectRepository = projectRepository;
         this.clientRepository = clientRepository;
+    }
+
+    /**
+     * Retorna um projeto pelo seu ID
+     * 
+     * @param projectId
+     * @return
+     */
+    public ProjectResponse getProjectById(UUID projectId) {
+        UUID organizationId = TenantContext.getCurrentOrganizationId();
+
+        Project project = this.projectRepository.findByIdAndOrganizationId(projectId, organizationId)
+                            .orElseThrow(() -> new BadRequestException("Projeto não encontrado"));
+
+        return ProjectResponse.fromEntity(project);
     }
 
     /**
@@ -64,5 +80,64 @@ public class ProjectService {
         this.projectRepository.save(project);
         
         return ProjectResponse.fromEntity(project);
+    }
+
+    /**
+     * Atualiza um projeto existente
+     * 
+     * @param projectId
+     * @param data
+     * @return
+     */
+    public ProjectResponse updateProject(UUID projectId, ProjectUpdate data) {
+        UUID organizationId = TenantContext.getCurrentOrganizationId();
+
+        Project project = this.projectRepository.findByIdAndOrganizationId(projectId, organizationId)
+                            .orElseThrow(() -> new BadRequestException("Projeto não encontrado"));
+
+        if (data.name() != null && !data.name().equals(project.getName())) {
+            if (this.projectRepository.existsByOrganizationIdAndNameIgnoreCaseAndIdNot(organizationId, data.name(), projectId)) {
+                throw new ConflictException("Já existe um projeto com esse nome");
+            }
+            project.setName(data.name());
+        }
+
+        if (data.description() != null) {
+            project.setDescription(data.description());
+        }
+
+        if (data.deadline() != null) {
+            project.setDeadline(data.deadline());
+        }
+
+        if (data.hourlyRate() != null) {
+            project.setHourlyRate(data.hourlyRate());
+        }
+
+        if (data.estimatedHours() != null) {
+            project.setEstimatedHours(data.estimatedHours());
+        }
+
+        if (data.status() != null) {
+            project.setStatus(data.status());
+        }
+
+        this.projectRepository.save(project);
+
+        return ProjectResponse.fromEntity(project);
+    }
+
+    /**
+     * Deleta um projeto pelo seu ID
+     * 
+     * @param projectId
+     */
+    public void deleteProject(UUID projectId) {
+        UUID organizationId = TenantContext.getCurrentOrganizationId();
+
+        Project project = this.projectRepository.findByIdAndOrganizationId(projectId, organizationId)
+                            .orElseThrow(() -> new BadRequestException("Projeto não encontrado"));
+
+        this.projectRepository.delete(project);
     }
 }
