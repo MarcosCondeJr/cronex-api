@@ -37,15 +37,15 @@ public class ProjectMemberService {
     }
 
     public ProjectMemberResponse addMember(UUID projectId, ProjectMemberRequest data) {
-        if (projectMemberRepository.existsByProjectIdAndUserId(projectId, UUID.fromString(data.userId()))) {
-            throw new ConflictException("O Usuário já está alocado nesse projeto");
-        }
-
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ConflictException("Projeto não encontrado"));
 
         User user = userRepository.findById(UUID.fromString(data.userId()))
                 .orElseThrow(() -> new ConflictException("Usuário não encontrado"));
+
+        if (projectMemberRepository.existsByProjectIdAndUserId(projectId, UUID.fromString(data.userId()))) {
+            throw new ConflictException("O usuário já está alocado nesse projeto");
+        }
             
         ProjectMember projectMember = new ProjectMember();
         projectMember.setProject(project);
