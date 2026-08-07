@@ -13,6 +13,7 @@ import com.chronex.cronex_api.entity.Project;
 import com.chronex.cronex_api.entity.ProjectMember;
 import com.chronex.cronex_api.entity.User;
 import com.chronex.cronex_api.exception.ConflictException;
+import com.chronex.cronex_api.infra.tenant.TenantContext;
 import com.chronex.cronex_api.repository.ProjectMemberRepository;
 import com.chronex.cronex_api.repository.ProjectRepository;
 import com.chronex.cronex_api.repository.UserRepository;
@@ -37,6 +38,8 @@ public class ProjectMemberService {
     }
 
     public ProjectMemberResponse addMember(UUID projectId, ProjectMemberRequest data) {
+        TenantContext.getCurrentOrganizationId(); 
+        
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ConflictException("Projeto não encontrado"));
 
@@ -59,15 +62,29 @@ public class ProjectMemberService {
         return ProjectMemberResponse.fromEntity(projectMember);
     }
 
+    public ProjectMemberResponse findById(UUID projectMemberId) {
+        ProjectMember projectMember = projectMemberRepository.findById(projectMemberId)
+                .orElseThrow(() -> new ConflictException("Membro do projeto não encontrado"));
+
+        return ProjectMemberResponse.fromEntity(projectMember);
+    }
+
     public ProjectMemberResponse updateMember(UUID projectMemberId, ProjectMemberUpdate data) {
-        UUID userId = UUID.fromString(data.userId());
-        
         ProjectMember projectMember = projectMemberRepository.findById(projectMemberId)
                 .orElseThrow(() -> new ConflictException("Membro do projeto não encontrado para edição"));
 
-        if (data.userId() != null && userId != projectMember.getUser().getId()) {
-            if (projectMemberRepository.existsByProjectIdAndUserIdAndProjectMemberIdNot(projectMember.getProject().getId(), userId, projectMember.getId())) {
-                throw new ConflictException("Este membro já está integrado no projeto");
+        if (data.userId() != null) {
+            UUID userId = UUID.fromString(data.userId());
+
+            if (!userId.equals(projectMember.getUser().getId())) {
+                if (projectMemberRepository.existsByProjectIdAndUserIdAndIdNot(projectMember.getProject().getId(), userId, projectMember.getId())) {
+                    throw new ConflictException("Este usuário já está integrado no projeto");
+                }
+
+                User user = userRepository.findById(userId)
+                        .orElseThrow(() -> new ConflictException("Usuário não encontrado"));
+
+                projectMember.setUser(user);
             }
         }
 
@@ -78,6 +95,9 @@ public class ProjectMemberService {
         if (data.hourlyRate() != null) {
             projectMember.setHourlyRate(data.hourlyRate());
         }
+
+        projectMember.setUpdatedAt(Instant.now());
+        projectMemberRepository.save(projectMember);
 
         return ProjectMemberResponse.fromEntity(projectMember);
     }

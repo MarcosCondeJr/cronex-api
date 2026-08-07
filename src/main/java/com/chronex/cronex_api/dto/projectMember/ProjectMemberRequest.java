@@ -6,15 +6,14 @@ import com.chronex.cronex_api.enums.OrganizationRole;
 
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 public record ProjectMemberRequest(
     @NotNull(message = "O usuário é obrigatório")
-    String userId, 
+    String userId,
 
-    @NotBlank(message = "A função do membro é obrigatória")
-    OrganizationRole role, 
+    @NotNull(message = "A função do membro é obrigatória")
+    OrganizationRole role,
 
     @Digits(
             integer = 8,
