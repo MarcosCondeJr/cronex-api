@@ -3,8 +3,12 @@ package com.chronex.cronex_api.service;
 import java.time.Instant;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import com.chronex.cronex_api.dto.project.ProjectFilter;
 import com.chronex.cronex_api.dto.project.ProjectRequest;
 import com.chronex.cronex_api.dto.project.ProjectResponse;
 import com.chronex.cronex_api.dto.project.ProjectUpdate;
@@ -20,6 +24,7 @@ import com.chronex.cronex_api.infra.tenant.TenantContext;
 import com.chronex.cronex_api.repository.ClientRepository;
 import com.chronex.cronex_api.repository.ProjectMemberRepository;
 import com.chronex.cronex_api.repository.ProjectRepository;
+import com.chronex.cronex_api.specification.ProjectSpecification;
 
 import jakarta.transaction.Transactional;
 
@@ -37,6 +42,22 @@ public class ProjectService {
         this.projectRepository = projectRepository;
         this.clientRepository = clientRepository;
         this.projectMemberRepository = projectMemberRepository;
+    }
+
+    /**
+     * Carrega os projetos de uma determinada organização
+     * 
+     * @param filter
+     * @param pageable
+     */
+    public Page<ProjectResponse> getProjects(ProjectFilter filter, Pageable pageable) {
+        UUID organizationId = TenantContext.getCurrentOrganizationId();
+
+        Specification<Project> spec = ProjectSpecification.withFilters(organizationId, filter);
+
+        Page<Project> projects = projectRepository.findAll(spec, pageable);
+
+        return projects.map(project -> ProjectResponse.fromEntity(project));
     }
 
     /**
