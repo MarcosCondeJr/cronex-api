@@ -16,7 +16,7 @@ public class ProjectSpecification {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
-            predicates.add(cb.equal(root.get("organization").get("id"), organizationId));
+            predicates.add(cb.equal(root.get("organizationId"), organizationId));
 
             if (filter.name() != null && !filter.name().isBlank()) {
                 predicates.add(

@@ -38,9 +38,10 @@ public class ProjectController {
     @GetMapping()
     public ResponseEntity<Page<ProjectResponse>> getProjects(
         ProjectFilter filter,
-        @PageableDefault(page = 0, size = 10, sort = "Id") Pageable pageable
+        @PageableDefault(page = 0, size = 10, sort = "id") Pageable pageable
     ) {
-        return ResponseEntity.status(HttpStatus.OK).body(this.projectService.getProjects(null, null));
+        Page<ProjectResponse> projects = this.projectService.getProjects(filter, pageable);
+        return ResponseEntity.status(HttpStatus.OK).body(projects);
     }
 
     @PostMapping
