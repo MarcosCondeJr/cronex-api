@@ -12,8 +12,10 @@ import com.chronex.cronex_api.dto.projectMember.ProjectMemberUpdate;
 import com.chronex.cronex_api.entity.Project;
 import com.chronex.cronex_api.entity.ProjectMember;
 import com.chronex.cronex_api.entity.User;
+import com.chronex.cronex_api.exception.BadRequestException;
 import com.chronex.cronex_api.exception.ConflictException;
 import com.chronex.cronex_api.infra.tenant.TenantContext;
+import com.chronex.cronex_api.repository.OrganizationMemberRepository;
 import com.chronex.cronex_api.repository.ProjectMemberRepository;
 import com.chronex.cronex_api.repository.ProjectRepository;
 import com.chronex.cronex_api.repository.UserRepository;
@@ -23,13 +25,26 @@ public class ProjectMemberService {
     private final ProjectMemberRepository projectMemberRepository;
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
+    private final OrganizationMemberRepository organizationMemberRepository;
 
-    public ProjectMemberService(ProjectMemberRepository projectMemberRepository, ProjectRepository projectRepository, UserRepository userRepository) {
+    public ProjectMemberService(
+        ProjectMemberRepository projectMemberRepository,
+        ProjectRepository projectRepository,
+        UserRepository userRepository,
+        OrganizationMemberRepository organizationMemberRepository
+    ) {
         this.projectMemberRepository = projectMemberRepository;
         this.projectRepository = projectRepository;
         this.userRepository = userRepository;
+        this.organizationMemberRepository = organizationMemberRepository;
     }
 
+    /**
+     * Retorna os membros de um determinado projeto
+     *
+     * @param projectId
+     * @return
+     */
     public List<ProjectMemberResponse> findAllByProject(UUID projectId) {
         return projectMemberRepository.findAllByProjectId(projectId)
                 .stream()
@@ -37,19 +52,29 @@ public class ProjectMemberService {
                 .toList();
     }
 
+    /**
+     * Adiciona um novo membro ao projeto
+     *
+     * @param projectId
+     * @param data
+     * @return
+     */
     public ProjectMemberResponse addMember(UUID projectId, ProjectMemberRequest data) {
-        TenantContext.getCurrentOrganizationId(); 
-        
+        UUID organizationId = TenantContext.getCurrentOrganizationId();
+
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new ConflictException("Projeto não encontrado"));
 
         User user = userRepository.findById(UUID.fromString(data.userId()))
                 .orElseThrow(() -> new ConflictException("Usuário não encontrado"));
 
+        organizationMemberRepository.findByOrganizationIdAndUserId(organizationId, UUID.fromString(data.userId()))
+            .orElseThrow(() -> new BadRequestException("o usuário informado não pertence a essa organização"));
+
         if (projectMemberRepository.existsByProjectIdAndUserId(projectId, UUID.fromString(data.userId()))) {
             throw new ConflictException("O usuário já está alocado nesse projeto");
         }
-            
+
         ProjectMember projectMember = new ProjectMember();
         projectMember.setProject(project);
         projectMember.setUser(user);
@@ -62,6 +87,12 @@ public class ProjectMemberService {
         return ProjectMemberResponse.fromEntity(projectMember);
     }
 
+    /**
+     * Busca um membro do projeto pelo Id
+     *
+     * @param projectMemberId
+     * @return
+     */
     public ProjectMemberResponse findById(UUID projectMemberId) {
         ProjectMember projectMember = projectMemberRepository.findById(projectMemberId)
                 .orElseThrow(() -> new ConflictException("Membro do projeto não encontrado"));
@@ -69,6 +100,13 @@ public class ProjectMemberService {
         return ProjectMemberResponse.fromEntity(projectMember);
     }
 
+    /**
+     * Atualiza um determinado membro do projeto
+     *
+     * @param projectMemberId
+     * @param data
+     * @return
+     */
     public ProjectMemberResponse updateMember(UUID projectMemberId, ProjectMemberUpdate data) {
         ProjectMember projectMember = projectMemberRepository.findById(projectMemberId)
                 .orElseThrow(() -> new ConflictException("Membro do projeto não encontrado para edição"));
@@ -102,6 +140,12 @@ public class ProjectMemberService {
         return ProjectMemberResponse.fromEntity(projectMember);
     }
 
+    /**
+     * Remove um determinado membro do projeto
+     *
+     * @param projectId
+     * @param userId
+     */
     public void removeMember(UUID projectId, UUID userId) {
         ProjectMember projectMember = projectMemberRepository.findByProjectIdAndUserId(projectId, userId)
                 .orElseThrow(() -> new ConflictException("Membro do projeto não encontrado"));
