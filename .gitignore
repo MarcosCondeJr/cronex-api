@@ -32,3 +32,9 @@ build/
 ### VS Code ###
 .vscode/
 .env
+
+/docs
+
+### Claude Code (uso pessoal, nao versionado) ###
+CLAUDE.md
+.claude/
