@@ -95,15 +95,17 @@ public class ClientService {
      * @return
      */
     public ClientResponse updateClient(String id, ClientUpdate clientUpdate) {
-        Client client = clientRepository.findById(UUID.fromString(id))
-                .orElseThrow(() -> new ConflictException("Cliente não encontrado."));
+        UUID organizationId = TenantContext.getCurrentOrganizationId();
+
+        Client client = clientRepository.findByIdAndOrganizationId(UUID.fromString(id), organizationId)
+                .orElseThrow(() -> new EntityNotFoundException("Cliente não encontrado."));
 
         if (clientUpdate.name() != null) {
             client.setName(clientUpdate.name());
         }
 
         if (clientUpdate.cpfCnpj() != null) {
-            if (clientRepository.existsByCpfCnpjAndUserIdAndIdNot(clientUpdate.cpfCnpj(), CurrentUserService.getCurrentUserId(), UUID.fromString(id))) {
+            if (clientRepository.existsByCpfCnpjAndUserIdAndOrganizationIdAndIdNot(clientUpdate.cpfCnpj(), CurrentUserService.getCurrentUserId(), organizationId, UUID.fromString(id))) {
                 throw new ConflictException("Já existe um cliente com o mesmo CPF/CNPJ.");
             }
             client.setCpfCnpj(clientUpdate.cpfCnpj());

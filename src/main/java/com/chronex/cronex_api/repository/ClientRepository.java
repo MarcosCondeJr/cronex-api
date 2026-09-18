@@ -15,6 +15,8 @@ public interface ClientRepository extends JpaRepository<Client, UUID>, JpaSpecif
 
     boolean existsByCpfCnpjAndUserIdAndIdNot(String cpfCnpj, UUID userId, UUID notId);
 
+    boolean existsByCpfCnpjAndUserIdAndOrganizationIdAndIdNot(String cpfCnpj, UUID userId, UUID organizationId, UUID notId);
+
     Optional<Client> findByIdAndUserId(UUID id, UUID userId);
 
     Optional<Client> findByIdAndOrganizationId(UUID id, UUID organizationId);
