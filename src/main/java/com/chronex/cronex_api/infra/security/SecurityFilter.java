@@ -42,7 +42,7 @@ public class SecurityFilter extends OncePerRequestFilter {
                 String email = tokenConfig.validateToken(token);
                 UserDetails user = this.userRepository.findByEmail(email);
 
-                if (user != null) {
+                if (user != null && user.isEnabled()) {
                     var authentication = new UsernamePasswordAuthenticationToken(
                             user,
                             null,
