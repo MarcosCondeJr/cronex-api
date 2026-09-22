@@ -11,17 +11,17 @@ public record ClientRequest(
 
         @CpfCnpj(message = "CPF ou CNPJ inválido")
         @NotEmpty(message = "Cpf ou Cnpj obrigatório")
-        @Length(max = 11, min = 11, message = "O cpf ou cnpj precisa conter entre 11 e 14 dígitos")
+        @Length(max = 14, min = 11, message = "O cpf ou cnpj precisa conter entre 11 e 14 dígitos")
         String cpfCnpj,
 
         String company,
 
         String email,
 
-        @Length(max = 11, min = 11, message = "O número de telefone precisa conter 11 dígitos")
+        @Length(max = 11, min = 10, message = "O número de telefone precisa conter entre 10 e 11 dígitos")
         String phone,
 
         String notes
 ) {
-        
+
 }
