@@ -16,7 +16,7 @@ import com.chronex.cronex_api.entity.Client;
 import com.chronex.cronex_api.entity.Project;
 import com.chronex.cronex_api.entity.ProjectMember;
 import com.chronex.cronex_api.entity.User;
-import com.chronex.cronex_api.enums.OrganizationRole;
+import com.chronex.cronex_api.enums.ProjectRole;
 import com.chronex.cronex_api.enums.ProjectStatus;
 import com.chronex.cronex_api.exception.BadRequestException;
 import com.chronex.cronex_api.exception.ConflictException;
@@ -35,7 +35,7 @@ public class ProjectService {
     private ProjectMemberRepository projectMemberRepository;
 
     public ProjectService(
-        ProjectRepository projectRepository, 
+        ProjectRepository projectRepository,
         ClientRepository clientRepository,
         ProjectMemberRepository projectMemberRepository
     ) {
@@ -46,7 +46,7 @@ public class ProjectService {
 
     /**
      * Carrega os projetos de uma determinada organização
-     * 
+     *
      * @param filter
      * @param pageable
      */
@@ -62,7 +62,7 @@ public class ProjectService {
 
     /**
      * Retorna um projeto pelo seu ID
-     * 
+     *
      * @param projectId
      * @return
      */
@@ -76,14 +76,14 @@ public class ProjectService {
     }
 
     /**
-     * Cria um novo projeto e adicionar o owner com um dos membros do 
+     * Cria um novo projeto e adicionar o owner com um dos membros do
      * projeto como adminstrador
-     * 
+     *
      * @param data
      * @return
      */
     @Transactional
-    public ProjectResponse createProject(ProjectRequest data) { 
+    public ProjectResponse createProject(ProjectRequest data) {
         UUID organizationId = TenantContext.getCurrentOrganizationId();
         User user = CurrentUserService.getCurrentUser();
 
@@ -95,7 +95,7 @@ public class ProjectService {
         }
 
         Project project = new Project();
-        project.setClient(client);        
+        project.setClient(client);
         project.setDeadline(data.deadline());
         project.setDescription(data.description());
         project.setName(data.name());
@@ -110,7 +110,7 @@ public class ProjectService {
         ProjectMember projectMember = new ProjectMember();
         projectMember.setProject(project);
         projectMember.setUser(user);
-        projectMember.setRole(OrganizationRole.OWNER);
+        projectMember.setRole(ProjectRole.OWNER);
         projectMember.setHourlyRate(data.hourlyRate());
         projectMember.setJoinedAt(Instant.now());
         projectMember.setCreatedAt(Instant.now());
@@ -122,7 +122,7 @@ public class ProjectService {
 
     /**
      * Atualiza um projeto existente
-     * 
+     *
      * @param projectId
      * @param data
      * @return
@@ -167,7 +167,7 @@ public class ProjectService {
 
     /**
      * Deleta um projeto pelo seu ID
-     * 
+     *
      * @param projectId
      */
     public void deleteProject(UUID projectId) {

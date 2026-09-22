@@ -2,7 +2,7 @@ package com.chronex.cronex_api.dto.projectMember;
 
 import java.math.BigDecimal;
 
-import com.chronex.cronex_api.enums.OrganizationRole;
+import com.chronex.cronex_api.enums.ProjectRole;
 
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Digits;
@@ -13,7 +13,7 @@ public record ProjectMemberRequest(
     String userId,
 
     @NotNull(message = "A função do membro é obrigatória")
-    OrganizationRole role,
+    ProjectRole role,
 
     @Digits(
             integer = 8,

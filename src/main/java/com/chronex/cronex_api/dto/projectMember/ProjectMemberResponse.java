@@ -6,13 +6,13 @@ import java.util.UUID;
 
 import com.chronex.cronex_api.dto.user.UserResponse;
 import com.chronex.cronex_api.entity.ProjectMember;
-import com.chronex.cronex_api.enums.OrganizationRole;
+import com.chronex.cronex_api.enums.ProjectRole;
 
 public record ProjectMemberResponse(
         UUID id,
         UserResponse user,
         String userName,
-        OrganizationRole role,
+        ProjectRole role,
         BigDecimal hourlyRate,
         Instant joinedAt
 ) {
