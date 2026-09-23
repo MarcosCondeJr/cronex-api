@@ -23,7 +23,6 @@ import com.chronex.cronex_api.dto.projectMember.ProjectMemberUpdate;
 import com.chronex.cronex_api.service.ProjectMemberService;
 
 import jakarta.validation.Valid;
-import jakarta.websocket.server.PathParam;
 
 @RestController
 @RequestMapping("api/project/{projectId}/members")

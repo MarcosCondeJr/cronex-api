@@ -1,7 +1,6 @@
 package com.chronex.cronex_api.service;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
@@ -74,11 +73,11 @@ public class ProjectMemberService {
     public ProjectMemberResponse addMember(UUID projectId, ProjectMemberRequest data) {
         UUID organizationId = TenantContext.getCurrentOrganizationId();
 
-        Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new ConflictException("Projeto não encontrado"));
+        Project project = projectRepository.findByIdAndOrganizationId(projectId, organizationId)
+                .orElseThrow(() -> new EntityNotFoundException("Projeto não encontrado"));
 
         User user = userRepository.findById(UUID.fromString(data.userId()))
-                .orElseThrow(() -> new ConflictException("Usuário não encontrado"));
+                .orElseThrow(() -> new EntityNotFoundException("Usuário não encontrado"));
 
         organizationMemberRepository.findByOrganizationIdAndUserId(organizationId, UUID.fromString(data.userId()))
             .orElseThrow(() -> new BadRequestException("o usuário informado não pertence a essa organização"));
