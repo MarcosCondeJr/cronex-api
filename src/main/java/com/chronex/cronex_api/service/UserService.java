@@ -12,6 +12,7 @@ import com.chronex.cronex_api.dto.user.UserResponse;
 import com.chronex.cronex_api.entity.Invitation;
 import com.chronex.cronex_api.entity.User;
 import com.chronex.cronex_api.enums.UserRole;
+import com.chronex.cronex_api.exception.BadRequestException;
 import com.chronex.cronex_api.exception.ConflictException;
 import com.chronex.cronex_api.repository.UserRepository;
 
@@ -24,7 +25,7 @@ public class UserService {
     private InvitationService invitationService;
 
     public UserService(
-        UserRepository userRepository, 
+        UserRepository userRepository,
         PasswordEncoder passwordEncoder,
         OrganizationService organizationService,
         InvitationService invitationService
@@ -37,7 +38,7 @@ public class UserService {
 
     /**
      * Registra um novo usuário no sistema.
-     * 
+     *
      * @param request
      * @return
      */
@@ -61,6 +62,11 @@ public class UserService {
 
         if (request.invitationToken() != null) {
             Invitation invitation = invitationService.getByToken(UUID.fromString(request.invitationToken()));
+
+            if (!invitation.getEmail().equalsIgnoreCase(user.getEmail())) {
+                throw new BadRequestException("Este convite foi enviado para outro e-mail");
+            }
+
             invitationService.acceptInvitationInternal(invitation, user.getId());
         }
         else
