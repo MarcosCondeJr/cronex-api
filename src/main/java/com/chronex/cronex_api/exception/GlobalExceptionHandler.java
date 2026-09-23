@@ -3,9 +3,12 @@ package com.chronex.cronex_api.exception;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.MDC;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -59,14 +62,31 @@ public class GlobalExceptionHandler {
         return buildError(HttpStatus.BAD_REQUEST, "BAD_REQUEST", ex.getMessage(), request.getMethod() + request.getRequestURI());
     }
 
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponseDTO> handleDataIntegrity(
+            DataIntegrityViolationException ex, HttpServletRequest request
+    ) {
+        String message = "Registro não pode ser excluído ou modificado pois possui dependências.";
+
+        if (ex.getCause() instanceof ConstraintViolationException) {
+            String rootMsg = ex.getRootCause().getMessage();
+
+            if (rootMsg.contains("fk_account_bank_id")) {
+                message = "Não é possível excluir o banco, pois existe contas vinculadas";
+            }
+        }
+
+        return buildError(HttpStatus.CONFLICT, "DATA_INTEGRITY", message, request.getMethod() + request.getRequestURI());
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponseDTO> handleValidationException(MethodArgumentNotValidException ex, HttpServletRequest request) {
-        
+
         List<FieldError> errors = ex.getBindingResult().getFieldErrors()
                                     .stream()
                                     .map(error -> new FieldError(
-                                            error.getField(), 
-                                            error.getRejectedValue() != null ? error.getRejectedValue().toString() : null, 
+                                            error.getField(),
+                                            error.getRejectedValue() != null ? error.getRejectedValue().toString() : null,
                                             error.getDefaultMessage()))
                                     .toList();
 
@@ -75,59 +95,59 @@ public class GlobalExceptionHandler {
 
     /**
      * Builda o erro a ser retornado
-     * 
+     *
      * @param status
      * @param code
      * @param message
      * @param path
      * @param errors
-     * 
+     *
      * @return
      */
     public ResponseEntity<ErrorResponseDTO> buildError(
-        HttpStatus status, 
-        String code, 
-        String message, 
-        String path, 
+        HttpStatus status,
+        String code,
+        String message,
+        String path,
         List<FieldError> errors
-    ) 
+    )
     {
         ErrorResponseDTO errorDTO = new ErrorResponseDTO(
             LocalDateTime.now().toString(),
             status.value(),
             code,
             message,
-            path, 
+            path,
             getOrCreateTraceId(),
             errors
         );
 
         return ResponseEntity.status(status).body(errorDTO);
-    } 
-    
+    }
+
     /**
      * Builda o erro a ser retornado sem os erros de validação de campo
-     * 
+     *
      * @param status
      * @param code
      * @param message
      * @param path
-     * 
+     *
      * @return
      */
     public ResponseEntity<ErrorResponseDTO> buildError(
-        HttpStatus status, 
-        String code, 
-        String message, 
+        HttpStatus status,
+        String code,
+        String message,
         String path
-    ) 
+    )
     {
         ErrorResponseDTO errorDTO = new ErrorResponseDTO(
             LocalDateTime.now().toString(),
             status.value(),
             code,
             message,
-            path, 
+            path,
             getOrCreateTraceId(),
             null
         );
@@ -137,11 +157,11 @@ public class GlobalExceptionHandler {
 
     /**
      * Retorna o traceId do contexto atual
-     * 
+     *
      * @return String Id
      */
     private String getOrCreateTraceId() {
-        return (MDC.get("traceId") != null) 
+        return (MDC.get("traceId") != null)
                 ? MDC.get("traceId")
                 : "N/A";
     }

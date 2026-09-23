@@ -14,34 +14,45 @@ import com.chronex.cronex_api.dto.client.ClientResponse;
 import com.chronex.cronex_api.dto.client.ClientUpdate;
 import com.chronex.cronex_api.entity.Client;
 import com.chronex.cronex_api.entity.Organization;
+import com.chronex.cronex_api.entity.OrganizationMember;
+import com.chronex.cronex_api.enums.OrganizationRole;
 import com.chronex.cronex_api.exception.ConflictException;
 import com.chronex.cronex_api.exception.EntityNotFoundException;
+import com.chronex.cronex_api.exception.ForbiddenException;
 import com.chronex.cronex_api.infra.tenant.TenantContext;
 import com.chronex.cronex_api.repository.ClientRepository;
+import com.chronex.cronex_api.repository.OrganizationMemberRepository;
 import com.chronex.cronex_api.repository.OrganizationRepository;
 import com.chronex.cronex_api.specification.ClientSpecification;
 
 @Service
 public class ClientService {
 
+    private final CurrentUserService currentUserService;
+
     private ClientRepository clientRepository;
 
-    private OrganizationRepository  organizationRepository;
+    private OrganizationRepository organizationRepository;
+
+    private OrganizationMemberRepository organizationMemberRepository;
 
     public ClientService(
-        ClientRepository clientRepository, 
-        OrganizationRepository organizationRepository
+        ClientRepository clientRepository,
+        OrganizationRepository organizationRepository,
+        OrganizationMemberRepository organizationMemberRepository, CurrentUserService currentUserService
     ) {
         this.clientRepository = clientRepository;
         this.organizationRepository = organizationRepository;
+        this.organizationMemberRepository = organizationMemberRepository;
+        this.currentUserService = currentUserService;
     }
 
     /**
      * Retorna a lista de clientes de um determinado usuário
-     * 
+     *
      * @param filter Filtros para a busca dos clientes
      * @param pageable Paginação
-     * 
+     *
      * @return
      */
     public Page<ClientResponse> getClients(ClientFilter filter, Pageable pageable) {
@@ -56,7 +67,7 @@ public class ClientService {
 
     /**
      * Cadastra um novo cliente para um determinado usuário
-     * 
+     *
      * @param clientRequest Requisição com os dados a serem cadastrado do cliente
      * @return
      */
@@ -89,7 +100,7 @@ public class ClientService {
 
     /**
      * Atualiza um cliente existente
-     * 
+     *
      * @param id Id do cliente a ser atualizado
      * @param clientUpdate Dados para atualização do cliente
      * @return
@@ -110,7 +121,7 @@ public class ClientService {
             }
             client.setCpfCnpj(clientUpdate.cpfCnpj());
         }
-        
+
         if (clientUpdate.company() != null) {
             client.setCompany(clientUpdate.company());
         }
@@ -136,13 +147,25 @@ public class ClientService {
 
     /**
      * Exclui um cliente de um determinado usuário
-     * 
+     *
      * @param string id Id do cliente a ser excluído
      * @return void
      */
     public void deleteClient(String id) {
-        Client client = clientRepository.findByIdAndUserId(UUID.fromString(id), CurrentUserService.getCurrentUserId())
+        UUID organizationId = TenantContext.getCurrentOrganizationId();
+
+        Client client = clientRepository.findByIdAndOrganizationId(UUID.fromString(id), organizationId)
                 .orElseThrow(() -> new ConflictException("Cliente não encontrado."));
+
+        OrganizationMember member = organizationMemberRepository
+                                        .findByOrganizationIdAndUserId(organizationId, CurrentUserService.getCurrentUserId())
+                                        .orElseThrow(() -> new ForbiddenException("Este usuário não tem permissão para realizar está ação"));
+
+        if (client.getUser().getId() != CurrentUserService.getCurrentUserId() &&
+            member.getRole() != OrganizationRole.OWNER && member.getRole() != OrganizationRole.ADMIN)
+        {
+            new ForbiddenException("Este usuário não tem permissão para realizar esta ação");
+        }
 
         clientRepository.delete(client);
     }
