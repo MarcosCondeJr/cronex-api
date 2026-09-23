@@ -4,8 +4,12 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import com.chronex.cronex_api.dto.projectMember.ProjectMemberFilter;
 import com.chronex.cronex_api.dto.projectMember.ProjectMemberRequest;
 import com.chronex.cronex_api.dto.projectMember.ProjectMemberResponse;
 import com.chronex.cronex_api.dto.projectMember.ProjectMemberUpdate;
@@ -20,6 +24,7 @@ import com.chronex.cronex_api.repository.OrganizationMemberRepository;
 import com.chronex.cronex_api.repository.ProjectMemberRepository;
 import com.chronex.cronex_api.repository.ProjectRepository;
 import com.chronex.cronex_api.repository.UserRepository;
+import com.chronex.cronex_api.specification.ProjectMemberSpecification;
 
 @Service
 public class ProjectMemberService {
@@ -46,16 +51,17 @@ public class ProjectMemberService {
      * @param projectId
      * @return
      */
-    public List<ProjectMemberResponse> findAllByProject(UUID projectId) {
+    public Page<ProjectMemberResponse> findAllByProject(UUID projectId, ProjectMemberFilter filter, Pageable pageable) {
         UUID organizationId = TenantContext.getCurrentOrganizationId();
 
         projectRepository.findByIdAndOrganizationId(projectId, organizationId)
                 .orElseThrow(() -> new EntityNotFoundException("Projeto não encontrado"));
 
-        return projectMemberRepository.findAllByProjectIdAndProjectOrganizationId(projectId, organizationId)
-                .stream()
-                .map(ProjectMemberResponse::fromEntity)
-                .toList();
+        Specification<ProjectMember> spec = ProjectMemberSpecification.withFilters(projectId, organizationId, filter);
+
+        Page<ProjectMember> membros = projectMemberRepository.findAll(spec, pageable);
+
+        return membros.map(membro -> ProjectMemberResponse.fromEntity(membro));
     }
 
     /**

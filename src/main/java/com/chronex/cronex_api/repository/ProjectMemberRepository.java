@@ -5,12 +5,13 @@ import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import com.chronex.cronex_api.entity.ProjectMember;
 
-public interface ProjectMemberRepository extends JpaRepository<ProjectMember, UUID>{
+public interface ProjectMemberRepository extends JpaRepository<ProjectMember, UUID>, JpaSpecificationExecutor<ProjectMember>{
     Optional<ProjectMember> findByProjectIdAndUserId(UUID projectId, UUID userId);
-    
+
     boolean existsByProjectIdAndUserId(UUID projectId, UUID userId);
 
     boolean existsByProjectIdAndUserIdAndIdNot(UUID projectId, UUID userId, UUID id);
