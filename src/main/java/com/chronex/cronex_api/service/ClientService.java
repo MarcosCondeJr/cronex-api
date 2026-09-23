@@ -42,7 +42,6 @@ public class ClientService {
         this.clientRepository = clientRepository;
         this.organizationRepository = organizationRepository;
         this.organizationMemberRepository = organizationMemberRepository;
-        this.currentUserService = currentUserService;
     }
 
     /**
