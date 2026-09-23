@@ -28,8 +28,6 @@ import com.chronex.cronex_api.specification.ClientSpecification;
 @Service
 public class ClientService {
 
-    private final CurrentUserService currentUserService;
-
     private ClientRepository clientRepository;
 
     private OrganizationRepository organizationRepository;
